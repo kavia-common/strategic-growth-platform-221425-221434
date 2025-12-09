@@ -49,3 +49,39 @@ body {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+@keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-40px) scale(1.05); }
+        }
+        @keyframes float-slower {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(30px); }
+        }
+        @keyframes fade-up {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-float { animation: float 20s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 30s ease-in-out infinite; }
+        .animate-float-slower { animation: float-slower 40s ease-in-out infinite; }
+        .animate-fade-up { animation: fade-up 0.8s ease-out forwards; }
+        .animate-spin-slow { animation: spin-slow 20s linear infinite; }
+        .animation-delay-100 { animation-delay: 100ms; }
+        .animation-delay-200 { animation-delay: 200ms; }
+        .animation-delay-300 { animation-delay: 300ms; }
+        .animation-delay-400 { animation-delay: 400ms; }
+        .animation-delay-500 { animation-delay: 500ms; }
+        .animation-delay-600 { animation-delay: 600ms; }
+        .bg-grid-pattern {
+          background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                            linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+          background-size: 50px 50px;
+        }
