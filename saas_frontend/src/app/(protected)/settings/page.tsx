@@ -9,9 +9,14 @@ import { UserProfile } from '@/types';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [currentOrgId, setCurrentOrgId] = useState<string>('');
 
   useEffect(() => {
     loadProfile();
+    // Move localStorage access to client-side effect to prevent hydration mismatch
+    if (typeof window !== 'undefined') {
+      setCurrentOrgId(localStorage.getItem('currentOrgId') || '');
+    }
   }, []);
 
   const loadProfile = async () => {
@@ -57,7 +62,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
             <p className="text-gray-500 text-sm mb-4">
-                Current Organization ID: {typeof window !== 'undefined' ? localStorage.getItem('currentOrgId') : ''}
+                Current Organization ID: {currentOrgId}
             </p>
             <Button variant="outline">Manage Members</Button>
         </CardContent>

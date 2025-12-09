@@ -11,6 +11,11 @@ import { Loading } from '@/components/ui/Loading';
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchMetrics = async () => {
     try {
@@ -74,7 +79,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">
                  {metric.name.includes('Revenue') || metric.name.includes('Sales') ? '$' : ''}
-                 {metric.value.toLocaleString()}
+                 {isMounted ? metric.value.toLocaleString() : metric.value}
               </div>
               <p className="text-xs text-gray-500 mt-1 flex items-center">
                 {metric.trend === 'up' && <ArrowUp className="text-success h-3 w-3 mr-1" />}
