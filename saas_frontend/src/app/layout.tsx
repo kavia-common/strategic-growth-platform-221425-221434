@@ -73,7 +73,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <body className="antialiased text-text bg-background font-sans min-h-screen">
+      <body 
+        className="antialiased text-text bg-background font-sans min-h-screen"
+        suppressHydrationWarning
+      >
         <div id="portal-root" />
         <main className="relative">
           {children}
