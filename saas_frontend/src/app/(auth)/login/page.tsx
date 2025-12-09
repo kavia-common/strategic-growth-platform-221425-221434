@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    orgName: '' // Optional for login context
+    orgName: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +25,21 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
+    
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -34,44 +47,66 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setGlobalError(null);
+    
     if (!validate()) return;
 
     setIsLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+      // Sign in with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
         password: formData.password,
       });
 
-      if (authError) throw authError;
-
-      // Handle Organization Context
-      if (formData.orgName) {
-         try {
-           // Attempt to find the org in user's orgs
-           const orgs = await api.get<Org[]>('/orgs');
-           const targetOrg = orgs.find(o => o.name.toLowerCase() === formData.orgName.toLowerCase());
-           
-           if (targetOrg) {
-             localStorage.setItem('currentOrgId', targetOrg.id);
-           } else {
-             // Org provided but not found/authorized - warn but don't block
-             console.warn('Organization not found or access denied');
-             // Optionally set error: setGlobalError(`Could not sign into organization "${formData.orgName}"`);
-             // But we allow login anyway
-           }
-         } catch (err) {
-           console.error('Failed to fetch orgs during login', err);
-         }
+      if (authError) {
+        throw new Error(authError.message);
       }
 
+      if (!authData.user) {
+        throw new Error('Login failed. Please try again.');
+      }
+
+      // Handle Organization Context
+      if (formData.orgName.trim()) {
+        try {
+          const orgs = await api.get<Org[]>('/orgs');
+          const targetOrg = orgs.find(
+            o => o.name.toLowerCase() === formData.orgName.trim().toLowerCase()
+          );
+          
+          if (targetOrg) {
+            localStorage.setItem('currentOrgId', targetOrg.id);
+          } else {
+            setGlobalError(
+              `Organization "${formData.orgName}" not found or you don't have access. Continuing to dashboard...`
+            );
+            // Continue anyway after a brief delay
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 2000);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to fetch organizations:', err);
+          // Continue to dashboard even if org fetch fails
+        }
+      }
+
+      // Successful login
       router.push('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setGlobalError(err.message);
+        // Handle specific error messages
+        if (err.message.includes('Invalid login credentials')) {
+          setGlobalError('Invalid email or password. Please try again.');
+        } else if (err.message.includes('Email not confirmed')) {
+          setGlobalError('Please verify your email address before logging in.');
+        } else {
+          setGlobalError(err.message);
+        }
       } else {
-        setGlobalError('Failed to login. Please check your credentials.');
+        setGlobalError('An unexpected error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -80,70 +115,127 @@ export default function LoginPage() {
 
   return (
     <AuthSplitLayout>
-      <div className="space-y-6">
-        <div className="space-y-2 text-center sm:text-left">
-          <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your account.
+      <div className="w-full max-w-md mx-auto space-y-8">
+        {/* Header */}
+        <div className="space-y-2 text-center">
+          <CardTitle className="text-3xl font-bold tracking-tight">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-base">
+            Sign in to your account to continue
           </CardDescription>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="name@example.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            error={errors.email}
-          />
-          <PasswordInput
-            label="Password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            error={errors.password}
-          />
-          <div className="flex justify-end">
-            <Link href="#" className="text-sm text-primary hover:underline">
-              Forgot password?
-            </Link>
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Email Input */}
+          <div className="space-y-2">
+            <Input
+              label="Email address"
+              type="email"
+              placeholder="name@example.com"
+              value={formData.email}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                if (errors.email) setErrors({ ...errors, email: '' });
+              }}
+              error={errors.email}
+              disabled={isLoading}
+              autoComplete="email"
+              required
+            />
           </div>
 
-          <div className="relative my-4">
-             <div className="absolute inset-0 flex items-center">
-               <span className="w-full border-t border-gray-200" />
-             </div>
-             <div className="relative flex justify-center text-xs uppercase">
-               <span className="bg-gray-50 px-2 text-gray-500">Optional</span>
-             </div>
+          {/* Password Input */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <Link 
+                href="/forgot-password" 
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                tabIndex={-1}
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <PasswordInput
+              value={formData.password}
+              onChange={(e) => {
+                setFormData({ ...formData, password: e.target.value });
+                if (errors.password) setErrors({ ...errors, password: '' });
+              }}
+              error={errors.password}
+              disabled={isLoading}
+              autoComplete="current-password"
+              required
+            />
           </div>
-          
-          <Input
-            label="Organization Name"
-            placeholder="e.g. Acme Corp"
-            value={formData.orgName}
-            onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
-            error={errors.orgName}
-          />
 
+          {/* Optional Organization Section */}
+          <div className="pt-2">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-gray-50 px-3 py-1 text-gray-500 font-medium">
+                  Optional
+                </span>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <Input
+                label="Organization name"
+                placeholder="e.g., Acme Corp"
+                value={formData.orgName}
+                onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
+                disabled={isLoading}
+                autoComplete="organization"
+              />
+              <p className="mt-1.5 text-xs text-gray-500">
+                Leave blank to select after login
+              </p>
+            </div>
+          </div>
+
+          {/* Error Message */}
           {globalError && (
-            <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md border border-red-100 flex items-center gap-2">
-              <span>⚠️</span>
-              {globalError}
+            <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+              <div className="flex gap-3">
+                <span className="text-red-500 text-lg flex-shrink-0">⚠️</span>
+                <p className="text-sm text-red-700 leading-relaxed">
+                  {globalError}
+                </p>
+              </div>
             </div>
           )}
 
-          <Button type="submit" className="w-full h-11 text-base" isLoading={isLoading}>
-            Sign In
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            className="w-full h-12 text-base font-semibold" 
+            isLoading={isLoading}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-500">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-primary hover:underline font-semibold">
-            Sign up
-          </Link>
-        </p>
+        {/* Sign Up Link */}
+        <div className="text-center pt-4">
+          <p className="text-sm text-gray-600">
+            Don&apos;t have an account?{' '}
+            <Link 
+              href="/signup" 
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Create one now
+            </Link>
+          </p>
+        </div>
       </div>
     </AuthSplitLayout>
   );
