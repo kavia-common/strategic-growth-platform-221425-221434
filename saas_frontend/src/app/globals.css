@@ -3,6 +3,7 @@
 @theme {
   --color-primary: #2563EB;
   --color-secondary: #F59E0B;
+  --color-amber: #F59E0B;
   --color-success: #F59E0B;
   --color-error: #EF4444;
   --color-background: #f9fafb;
@@ -11,6 +12,8 @@
 }
 
 :root {
+  --color-primary: #2563EB;
+  --color-amber: #F59E0B;
   --foreground-rgb: 17, 24, 39;
   --background-start-rgb: 249, 250, 251;
   --background-end-rgb: 249, 250, 251;

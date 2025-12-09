@@ -152,13 +152,15 @@ export default function LoginPage() {
               <label className="text-sm font-medium text-gray-700">
                 Password
               </label>
-              <Link 
-                href="/forgot-password" 
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              <Button 
+                variant="link"
+                className="text-sm font-medium h-auto px-0 text-primary hover:text-primary/80"
                 tabIndex={-1}
+                onClick={() => router.push('/forgot-password')}
+                type="button"
               >
                 Forgot password?
-              </Link>
+              </Button>
             </div>
             <PasswordInput
               value={formData.password}
@@ -216,7 +218,8 @@ export default function LoginPage() {
           {/* Submit Button */}
           <Button 
             type="submit" 
-            className="w-full h-12 text-base font-semibold" 
+            className="w-full font-semibold shadow-lg" 
+            size="lg"
             isLoading={isLoading}
             disabled={isLoading}
           >

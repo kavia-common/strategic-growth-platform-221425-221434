@@ -179,6 +179,8 @@ export default function SignupPage() {
           <Button 
             onClick={() => router.push('/login')} 
             className="w-full"
+            size="lg"
+            variant="outline"
           >
             Go to Login
           </Button>
@@ -343,7 +345,8 @@ export default function SignupPage() {
           {/* Submit Button */}
           <Button 
             type="submit" 
-            className="w-full h-12 text-base font-semibold" 
+            className="w-full font-semibold shadow-lg" 
+            size="lg"
             isLoading={isLoading}
             disabled={isLoading}
           >

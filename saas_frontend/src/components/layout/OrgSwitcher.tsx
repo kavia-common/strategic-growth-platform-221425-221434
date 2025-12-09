@@ -47,7 +47,8 @@ export function OrgSwitcher() {
     <div className="relative">
       <Button
         variant="ghost"
-        className="w-full justify-between px-2 hover:bg-gray-100"
+        size="sm"
+        className="w-full justify-between px-2 hover:bg-gray-100 h-9"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="flex items-center gap-2 truncate">
