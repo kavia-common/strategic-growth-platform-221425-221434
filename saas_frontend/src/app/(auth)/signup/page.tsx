@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,12 +42,12 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-          <p className="text-center text-sm text-gray-500">
+          <CardDescription className="text-center">
             Enter your email below to create your account
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
@@ -68,7 +68,7 @@ export default function SignupPage() {
               minLength={6}
             />
             {error && (
-              <div className="text-sm text-error bg-red-50 p-2 rounded">
+              <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md border border-red-100">
                 {error}
               </div>
             )}
@@ -80,7 +80,7 @@ export default function SignupPage() {
         <CardFooter className="justify-center">
           <p className="text-sm text-gray-500">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline font-medium">
               Sign in
             </Link>
           </p>
