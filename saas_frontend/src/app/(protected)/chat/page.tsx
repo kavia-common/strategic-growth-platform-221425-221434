@@ -39,7 +39,6 @@ export default function ChatPage() {
       loadMessages(selectedConversation.id);
       subscribeToMessages(selectedConversation.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConversation]);
 
   useEffect(() => {
